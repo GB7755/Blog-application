@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.codewithdurgesh.blog.exceptions.*;
-import com.codewithdurgesh.blog.payloads.UserDto;
-import com.codewithdurgesh.blog.services.UserService;
-import com.codewithdurgesh.blog.repositories.*;
 import com.codewithdurgesh.blog.config.AppConstants;
-import com.codewithdurgesh.blog.entities.*;
+import com.codewithdurgesh.blog.entities.Role;
+import com.codewithdurgesh.blog.entities.User;
+import com.codewithdurgesh.blog.exceptions.ResourceNotFoundException;
+import com.codewithdurgesh.blog.payloads.UserDto;
+import com.codewithdurgesh.blog.repositories.RoleRepo;
+import com.codewithdurgesh.blog.repositories.UserRepo;
+import com.codewithdurgesh.blog.services.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {

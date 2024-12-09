@@ -1,5 +1,6 @@
 package com.codewithdurgesh.blog.security;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 
 @Component
@@ -22,6 +25,8 @@ public class JwtTokenHelper {
 
 
     private String secret = "jwtTokenKey";
+    
+    SecretKey key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
 
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
@@ -38,11 +43,19 @@ public class JwtTokenHelper {
         return claimsResolver.apply(claims);
     }
 
-    //for retrieveing any information from token we will need the secret key
+	/*
+	 * //for retrieveing any information from token we will need the secret key
+	 * private Claims getAllClaimsFromToken(String token) { return
+	 * Jwts.parser().setSigningKey(secret).parse(token).getBody(); }
+	 */
+    
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-    }
-
+        return Jwts.parser()  // Use parserBuilder() instead of parser()
+                   .setSigningKey(key) // Set signing key with bytes for better handling
+                   .build()           // Build the parser
+                   .parseClaimsJws(token) // Parse the token expecting JWS format
+                   .getBody();
+                   }
     //check if the token has expired
     private Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
@@ -62,11 +75,16 @@ public class JwtTokenHelper {
     //   compaction of the JWT to a URL-safe string
     private String doGenerateToken(Map<String, Object> claims, String subject) {
 
-        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, secret).compact();
-    }
+    	 return Jwts.builder()
+    	            .setClaims(claims)                          // Add custom claims
+    	            .setSubject(subject)                        // Set the subject (e.g., username)
+    	            .setIssuedAt(new Date(System.currentTimeMillis()))                    // Set the issue time
+    	            .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000)) // Token validity (10 hours)
+    	            .signWith(key, SignatureAlgorithm.HS256)    // Sign the token with HmacSHA256
+    	            .compact();
 
+    }
+   
     //validate token
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);

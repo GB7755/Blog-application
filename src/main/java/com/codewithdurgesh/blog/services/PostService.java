@@ -2,7 +2,6 @@ package com.codewithdurgesh.blog.services;
 
 import java.util.List;
 
-import com.codewithdurgesh.blog.entities.Post;
 import com.codewithdurgesh.blog.payloads.PostDto;
 import com.codewithdurgesh.blog.payloads.PostResponse;
 
